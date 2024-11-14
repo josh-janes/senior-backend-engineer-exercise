@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      - PORT=8080
+    volumes:
+      - ./employees.db:/app/employees.db

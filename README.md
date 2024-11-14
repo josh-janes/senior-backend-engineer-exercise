@@ -1,67 +1,47 @@
-# Syndio Backend App
+## Features
 
-Using the `employees.db` sqlite database in this repository with the following table/data:
+1. The API accepts job data in JSON format and updates the SQLite database
+2. Uses transactions to ensure data consistency
+3. Handles both insertions and updates (UPSERT) using SQLite's ON CONFLICT clause
+4. Validates foreign key constraints against the employees table
+5. Configurable port through environment variable
+6. Dockerized server
+
+## To run the server
+
+The server is fully Dockerized, so all you need to do is build the image and run.
 
 ```
-sqlite> .open employees.db
-sqlite> .schema employees
-CREATE TABLE employees (id INTEGER PRIMARY KEY, gender TEXT not null);
-sqlite> SELECT * FROM employees;
-1|male
-2|male
-3|male
-4|female
-5|female
-6|female
-7|non-binary
+export PORT=8080
+
+# Build the Docker image
+docker build -t syndio-backend .
+
+# Run the container
+docker run -p $PORT:$PORT -v $(pwd)/employees.db:/app/employees.db syndio-backend
 ```
 
-Create an API endpoint that saves job data for the corresponding employees.
+## Usage
 
-Example job data:
+To ingest or update job data, send a POST request to /api/jobs endpoint:
 
-```json
-[
-  { "employee_id": 1, "department": "Engineering", "job_title": "Senior Enginer" },
-  { "employee_id": 2, "department": "Engineering", "job_title": "Super Senior Enginer" },
-  { "employee_id": 3, "department": "Sales", "job_title": "Head of Sales"},
-  { "employee_id": 4, "department": "Support", "job_title": "Tech Support" },
-  { "employee_id": 5, "department": "Engineering", "job_title": "Junior Enginer" },
-  { "employee_id": 6, "department": "Sales", "job_title": "Sales Rep" },
-  { "employee_id": 7, "department": "Marketing", "job_title": "Senior Marketer" }
-]
+### POST /api/jobs
+
+```
+# Test the API endpoint
+curl -X POST http://localhost:8080/api/jobs \
+  -H "Content-Type: application/json" \
+  -d '[
+    {"employee_id": 1, "department": "Engineering", "job_title": "Senior Engineer"},
+    {"employee_id": 2, "department": "Engineering", "job_title": "Super Senior Engineer"}
+  ]'
 ```
 
-## Requirements
+To get a list of employees in the database:
 
-- The API must take an environment variable `PORT` and respond to requests on that port.
-- You provide:
-  - Basic setup instructions required to run the API
-  - Guide on how to ingest the data through the endpoint
-  - A way to update the existing database given to you
+### GET /api/employees
+```
+# List all employees and their job data
+curl http://localhost:8080/api/employees
+```
 
-## Success
-
-- We can run the API and ingest database on your setup instructions
-- The API is written in Python or Go
-
-## Not Required
-
-- Tests
-- Logging, monitoring, or anything more than basic error handling
-
-## Submission
-
-- Respond to the email you received giving you this with:
-  - a zip file, or link to a git repo
-  - instructions on how to setup and run the code (could be included w/ zip/git)
-- We'll follow the instructions to test it on a local machine, then we'll get back to you
-
-## Notes
-
-- Keep it simple
-- If the API does what we requested, then it's a success
-- Anything extra (tests, other endpoints, ...) is not worth bonus/etc
-- We expect this to take less than two hours, please try and limit your effort to that window
-- We truly value your time and just want a basic benchmark and common piece of code to use in future interviews
-- If we bring you in for in-person interviews, your submission might be revisited and built on during the interview process
